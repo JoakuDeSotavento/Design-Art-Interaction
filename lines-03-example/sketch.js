@@ -1,65 +1,52 @@
-let myLines = []; 
-let totalLines = 150;
-let colorHueInit = 125;
+/******************
+Code by Vamoss
+Original code link:
+https://www.openprocessing.org/sketch/624879
+
+Author links:
+http://vamoss.com.br
+http://twitter.com/vamoss
+http://github.com/vamoss
+******************/
+
+var circles = []
+var total = 100
+var img;
+
+function preload() {
+	img = loadImage('esteticaTecnica.jpg');
+}
 
 function setup() {
-  createCanvas(window.screen.width, window.screen.height);
-  colorMode(HSB, 100);
-
-  colorHueInit = random(0, 255);
-   
-  for (let i = 0; i < totalLines; i++) {
-    myLines[i] = new Line(); 
-  } 
+	createCanvas(img.width, img.height);
+	background(0);
+	
+	for(var i = 0; i < total; i++){
+		circles[i] = {};
+		circles[i].prevPos = {x: width/2, y: height/2}
+		circles[i].pos = {x: width/2, y: height/2}
+		circles[i].dir = random() > 0.5 ? 1 : -1
+		circles[i].radius = random(3, 10)
+		circles[i].angle = 0
+	}
 }
 
 function draw() {
+	for(var i = 0; i < total; i++){
+		var circle = circles[i]
+		circle.angle += 1/circle.radius*circle.dir
 
-  background(50, 10, 10);
+		circle.pos.x += cos(circle.angle) * circle.radius
+		circle.pos.y += sin(circle.angle) * circle.radius
+		if(brightness(img.get(round(circle.pos.x), round(circle.pos.y))) > 70 || circle.pos.x < 0 || circle.pos.x > width || circle.pos.y < 0 || circle.pos.y > height){
+			circle.dir *= -1
+			circle.radius = random(3, 10)
+			circle.angle += PI
+		}
+		stroke(img.get(circle.pos.x, circle.pos.y))
+		line(circle.prevPos.x, circle.prevPos.y, circle.pos.x, circle.pos.y)
 
-  for (let i = 0; i < totalLines; i++) {
-  	myLines[i].move();
-  	myLines[i].display();
-  }
- 
-}
-
-class Line{
-	 
-  constructor() {
-    this.x = random(width);
-    this.y = random(height);
-    this.diameter = random(50, 150);
-    this.speedX = random(0, 3);
-    this.speedY = random(0, 3);
-    this.colorH = colorHueInit + random(-5, 5);
-    this.colorS = 100 + random(-50, 50);
-    this.colorV = 100 + random(-50, 50);
-    this.weight = random(5, 15);
-  }
-
-  move() {
-    this.x += this.speedX;
-    this.y += this.speedY;
-    if(this.x > width + this.diameter){
-    	this.x = -this.diameter;
-    }
-    if(this.y > height + this.diameter){
-		  this.y = -this.diameter;
-    }
-  }
-
-  display() {
-  	let d = float(dist(mouseX, mouseY, this.x+this.diameter*0.5, this.y));
-  	if (d < 100) {
-      strokeWeight(this.weight + d);
-    } else {
-      strokeWeight(this.weight);
-    } 
-    this.colorH += 1;
-    if (this.colorH > 100) { this.colorH = 0; }
-  	stroke(this.colorH, this.colorS, this.colorV, 90);
-    line(this.x, this.y, this.x+this.diameter, this.y);
-  }
-	
+		circle.prevPos.x = circle.pos.x
+		circle.prevPos.y = circle.pos.y
+	}
 }
